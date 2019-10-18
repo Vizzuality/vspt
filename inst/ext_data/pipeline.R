@@ -5,8 +5,8 @@
 # Load packages
 require(vspt)
 
-# Edit the args yaml file
-arg_list = yaml::read_yaml(system.file("arg_list.yaml", package = 'vspt'))
+# Set the args yaml file path!
+arg_list = yaml::read_yaml(system.file("ext_data/arg_list.yaml", package = 'vspt'))
 
 # Parse creds
 arg_list$creds <- yaml::read_yaml(arg_list$creds_path)
@@ -120,6 +120,8 @@ if (exists('spp_occurence_sfc_list')) {
   # Update the spp_list with this output, as order changes!!
   arg_list$spp_list <- names(spp_occurence_sfc_list)
   # Save the arg_list
+  # remove creds
+  arg_list$creds <- NULL
   save(arg_list, file = "arg_list.rda")
   # Export as spp occurence sfc CSV
   print("Writing species occurence sfc list to CSV")
