@@ -5,11 +5,17 @@
 # Load packages
 require(vspt)
 
-# Set the args yaml file path!
-arg_list = yaml::read_yaml(system.file("ext_data/arg_list.yaml", package = 'vspt'))
+# Set the args yaml file path
+arg_list = yaml::read_yaml("arg_list.yaml")
 
 # Parse creds
 arg_list$creds <- yaml::read_yaml(arg_list$creds_path)
+
+# Parse species list
+arg_list$search_spp_list <- select_species_names(
+  do.call(file.path, as.list(arg_list$search_spp_list_path)),
+  arg_list$iso3,
+  field="canonicalName")
 
 # resume pipeline from specific step or calculate everything?
 resume = TRUE
@@ -822,11 +828,11 @@ if (!exists('bv_sstat')) {
 
   # Get GADM v 3.6 adm0 polygon
   g <- sf::st_as_sf(raster::getData(
-      country = arg_list$iso3,
-      level = 0,
-      path = ".",
-      download = T
-    ))
+    country = arg_list$iso3,
+    level = 0,
+    path = ".",
+    download = T
+  ))
 
   do_zs <- function(so, g)
   {
@@ -866,7 +872,7 @@ if (!exists('bv_sstat')) {
   print("Calculating historical summary stats")
   bv_sstat <- list()
   bv_sstat$historical <-
-   do_zs(bvso[[arg_list$region]]$historical$raw_masked, g = g)
+    do_zs(bvso[[arg_list$region]]$historical$raw_masked, g = g)
 
   print("Calculating future summary stats")
   bv_sstat$future <-

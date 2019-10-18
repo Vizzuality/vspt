@@ -39,6 +39,9 @@ create_biovar_stack <- function(
   use_future_pca
 ){
 
+  # Create output file dir
+  dir.create("bioclimatic_ensemble_rasters")
+
   # Set raster::raster options
   raster::rasterOptions(progress = 'text',
                         timer=TRUE,

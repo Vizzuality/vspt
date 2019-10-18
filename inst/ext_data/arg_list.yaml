@@ -2,16 +2,21 @@
 # Arguments for biomod2 species distribution modelling pipeline
 # YAML
 ################################################################################
+# Edit paths, region (should match bioclimatic directory), iso, and
+# species list
 
 # Path to store model outputs (string list)
 # as list of dir structure
-out_path: ["~", 'Downloads','copernicus-forests','SWE']
+out_path: ["."]
+
+# Path to csv with columns iso3 and species canocialName
+search_spp_list_path: [".", "iso3_species_list.csv"]
 
 # Name of region (string)
-region: 'biovar_Sweden'
+region: 'REGION'
 
 # ISO3 string for region
-iso3: 'SWE'
+iso3: 'ISO3'
 
 ################################################################################
 # SPECIES OCCURENCE
@@ -31,17 +36,7 @@ creds_path: '~/gbif_creds.yaml'
 search_spp_list:
   - 'Picea abies'
   - 'Picea glauca'
-  - 'Picea pungens'
-  - 'Picea obovata'
-  - 'Picea omorika'
-  - 'Picea sitchensis'
-  - 'Pinus cembra'
-  - 'Pinus contorta'
-  - 'Pinus mugo'
-  - 'Pinus nigra'
-  - 'Pinus sibirica'
-  - 'Pinus strobus'
-  - 'Pinus sylvestris'
+
 
 # Starting year for occurence search (integer)
 start_year: 1985
