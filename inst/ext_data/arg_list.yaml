@@ -1,0 +1,182 @@
+################################################################################
+# Arguments for biomod2 species distribution modelling pipeline
+# YAML
+################################################################################
+
+# Path to store model outputs (string list)
+# as list of dir structure
+out_path: ["~", 'Downloads','copernicus-forests','SWE']
+
+# Name of region (string)
+region: 'biovar_Sweden'
+
+# ISO3 string for region
+iso3: 'SWE'
+
+################################################################################
+# SPECIES OCCURENCE
+################################################################################
+
+# Define account credentials for GBIF downloads
+# Place in a text file as:
+# creds:
+#   user: 'user-name'
+#   pwd: 'password'
+#   email: 'email'
+creds_path: '~/gbif_creds.yaml'
+
+# List of scientific species names to search for GBIF occurences (string list)
+# Note not all these maybe found!
+# Check GBIF site for correct names
+search_spp_list:
+  - 'Picea abies'
+  - 'Picea glauca'
+  - 'Picea pungens'
+  - 'Picea obovata'
+  - 'Picea omorika'
+  - 'Picea sitchensis'
+  - 'Pinus cembra'
+  - 'Pinus contorta'
+  - 'Pinus mugo'
+  - 'Pinus nigra'
+  - 'Pinus sibirica'
+  - 'Pinus strobus'
+  - 'Pinus sylvestris'
+
+# Starting year for occurence search (integer)
+start_year: 1985
+
+# Ending year for occurence search (integer)
+end_year: 2020
+
+# Path to export point geometries of spp occurence
+spp_output_path: 'spp_occurence_sfc.csv'
+
+################################################################################
+# BIOCLIMATIC VARIABLES
+################################################################################
+
+# Data preparation options
+# mask biovar rasters by land polygon?
+mask_by_land: True
+# transform biovar raster stack into 3 principle components
+pca_transform: True
+# use future biovars for pca
+use_future_pca: False
+
+# Path to folder with bioclimatic rasters (string);
+# must contain nested directories of bioclimatic rasters:
+#  /bioclimatic
+#     - /<region>
+#       - /historical
+#         - <biovar[01-19]>
+#       - /future
+#         - /<time_periods>
+#           - /<scenarios>
+#             -<model_biovar[01-19]>
+path: 'bioclimatic'
+
+# List of bioclimatic variable names (string list)
+biovar_list:
+  - 'biovar01'
+  - 'biovar02'
+  - 'biovar03'
+  - 'biovar04'
+  - 'biovar05'
+  - 'biovar06'
+  - 'biovar07'
+  - 'biovar08'
+  - 'biovar09'
+  - 'biovar10'
+  - 'biovar11'
+  - 'biovar12'
+  - 'biovar13'
+  - 'biovar14'
+  - 'biovar15'
+  - 'biovar16'
+  - 'biovar17'
+  - 'biovar18'
+  - 'biovar19'
+
+# List of scenarios
+scenario_list: ['rcp45', 'rcp85']
+
+# List of mid-point of time-intervals
+time_interval_list: ['2020', '2030', '2040', '2050', '2060', '2070', '2080', '2090']
+
+# Path to biovar stack object (.rda, see `create_biovar_stack`)
+# should not need to change this
+bvso_path: 'bioclimatic.rda'
+
+################################################################################
+# MODELLING
+################################################################################
+
+# Modelling object paths
+# List of species occurence simple features collection objects
+spp_occurence_sfc_list: 'spp_occurence_sfc_list.rda'
+
+# List of species occurence simple features collection objects
+spp_occurence_raster_list: 'spp_occurence_raster_list.rda'
+
+# List of biomod2 data package objects
+biomod_data_package_list: "biomod_data_package_list.rda"
+
+# List of biomod2 calibrated model objects
+biomod_model_list_path: 'biomod_model_list.rda'
+
+# List of biomod2 calibrated ensemble model objects
+biomod_ensemble_model_list: 'biomod_ensemble_model_list.rda'
+
+# List of biomod2 model projection objects
+biomod_model_projection_list: 'biomod_model_projection_list.rda'
+
+# List of biomod2 ensemble model projection objects
+biomod_ensemble_model_projection_list: 'biomod_ensemble_model_projection_list.rda'
+
+# List of biomod2 ensemble model projection raster objects
+biomod_ensemble_raster_list: 'biomod_ensemble_raster_list.rda'
+
+################################################################################
+# ZONAL STATISTICS
+################################################################################
+
+# Path to sf::sfc polygon object for binning zonal stats (string)
+# see `create_grid_from_poly` which generates .rda object
+vpgo_path: 'ISEA-3-HEXAGON_grid.rda'
+
+# grid zoom level for ISEA-3-HEXAGON_grid (integer)
+grid_res: 11
+
+# path spp zstats object
+spp_zstat_path: "spp_zstat.rda"
+
+# path spp zstats grid object
+spp_zstat_grid_path: "spp_zstat_grid.rda"
+
+# basename for geometry + zonal stats output
+zstats_output_basename: 'zonal_spp_ISEA-3-HEXAGON_grid'
+
+# list of formats for geometry + zonal stats output
+zstats_output_formats: ['.csv']
+
+# path spp zstats object
+bv_zstat_path: "bv_zstat.rda"
+
+# path bv zstats grid object
+bv_zstat_grid_path: "bv_zstat_grid.rda"
+
+# basename for geometry + zonal stats output
+bv_zstats_output_basename: 'zonal_bv_ISEA-3-HEXAGON_grid'
+
+# lists of summary stats
+spp_sstat_path: 'spp_sstat.rda'
+
+# out path of summary stats
+spp_sstat_out_path: "spp_summary_stats.csv"
+
+# lists of summary stats
+bv_sstat_path: 'bv_sstat.rda'
+
+# out path of summary stats
+bv_sstat_out_path: "bv_summary_stats.csv"
