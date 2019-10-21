@@ -19,3 +19,9 @@ Vector string of names
 \description{
 Select species names by country iso3 code
 }
+\examples{
+arg_list = yaml::read_yaml("arg_list.yaml")
+path = do.call(file.path, as.list(arg_list$search_spp_list_path))
+iso3 = 'TZA'
+spp_list <- select_species_names(path, iso3)
+}

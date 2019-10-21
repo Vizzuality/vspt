@@ -1,10 +1,17 @@
 #' Create ISEA-3-HEXAGON_grid_from_polygon
 #'
+#' Create a hexagon grid covering the polygon object at given resolution.
+#' Set `intersect_polygon` = T for a grid with only geometries that touch the
+#' polygon object, else a grid covering the bounding box of the object is
+#' returned.
+#'
 #' @param polygon_object A sf polygon object
 #' @param grid_res The desired grid resolution for the hex grid
+#' @param set_seed Give a string used to fix random seed for uuids
+#' @param intersect_polygon Boolean, intersect the grid with polygon object
 #'
 #' @return
-#' A sf::sf object where each feature is a hexagon with a unique uuid, area [m2], and perimeter [m]
+#' A sf::sf object where each feature is a hexagon with a unique uuid, area [m2], and perimeter [m].
 #' @export
 #'
 #' @examples
@@ -19,7 +26,7 @@
 #' tmap_mode("view")
 #' tm_shape(g)+ tm_fill("area_m2", palette = sf::sf.colors(3), alpha=0.7, colorNA=NULL,
 #' legend.show = T)}else{plot(g)}
-create_grid_from_poly <- function(polygon_object, grid_res, set_seed=F){
+create_grid_from_poly <- function(polygon_object, grid_res, set_seed=F, intersect_polygon=T){
 
   # Convert text seed to integer
   if(!is.null(set_seed) | isTRUE(set_seed)){
@@ -36,6 +43,10 @@ create_grid_from_poly <- function(polygon_object, grid_res, set_seed=F){
 
   # Apply to polygon and convert to sf object
   hg <- sf::st_as_sf(dggridR::dgshptogrid(dggs=dggs, shpfname=f, frame=F))
+
+  if(intersect_polygon){
+    hg <- hg[lengths(sf::st_intersects(hg, polygon_object)) > 0,]
+  }
 
   # Add random uuids to each feature
   if(set_seed){set.seed(set_seed)}

@@ -16,7 +16,9 @@
 #create_spp_query_list(spp_list, geom, creds, start_year=1986, end_year=2020)
 create_spp_query_list <- function(spp_list, bb, creds, start_year=1986, end_year=2020){
   keys <- lapply(spp_list, rgbif::name_backbone, rank='species')
-  nms <- lapply(keys, function(x) x$canonicalName)
+  match_type <- sapply(keys, function(x) x$matchType)
+  keys <- keys[match_type != 'NONE']
+  nms <- sapply(keys, function(x) x$canonicalName)
 
   # c_list <- lapply(keys, function(k){
   #   rgbif::occ_count(
@@ -63,6 +65,6 @@ create_spp_query_list <- function(spp_list, bb, creds, start_year=1986, end_year
     format="SIMPLE_CSV"
     )
    })
-   names(q_list) <- spp_list
+   names(q_list) <- nms
    return(q_list)
 }

@@ -4,18 +4,26 @@
 \alias{create_grid_from_poly}
 \title{Create ISEA-3-HEXAGON_grid_from_polygon}
 \usage{
-create_grid_from_poly(polygon_object, grid_res, set_seed = F)
+create_grid_from_poly(polygon_object, grid_res, set_seed = F,
+  intersect_polygon = T)
 }
 \arguments{
 \item{polygon_object}{A sf polygon object}
 
 \item{grid_res}{The desired grid resolution for the hex grid}
+
+\item{set_seed}{Give a string used to fix random seed for uuids}
+
+\item{intersect_polygon}{Boolean, intersect the grid with polygon object}
 }
 \value{
-A sf::sf object where each feature is a hexagon with a unique uuid, area [m2], and perimeter [m]
+A sf::sf object where each feature is a hexagon with a unique uuid, area [m2], and perimeter [m].
 }
 \description{
-Create ISEA-3-HEXAGON_grid_from_polygon
+Create a hexagon grid covering the polygon object at given resolution.
+Set `intersect_polygon` = T for a grid with only geometries that touch the
+polygon object, else a grid covering the bounding box of the object is
+returned.
 }
 \examples{
 bv <- create_biovar_stack(

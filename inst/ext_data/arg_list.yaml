@@ -3,7 +3,7 @@
 # YAML
 ################################################################################
 # Edit paths, region (should match bioclimatic directory), iso, and
-# species list
+# location of species list
 
 # Path to store model outputs (string list)
 # as list of dir structure
@@ -32,11 +32,9 @@ creds_path: '~/gbif_creds.yaml'
 
 # List of scientific species names to search for GBIF occurences (string list)
 # Note not all these maybe found!
+# moved these to a single searchable file!
 # Check GBIF site for correct names
-search_spp_list:
-  - 'Picea abies'
-  - 'Picea glauca'
-
+#search_spp_list:
 
 # Starting year for occurence search (integer)
 start_year: 1985

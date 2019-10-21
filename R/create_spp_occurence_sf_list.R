@@ -17,31 +17,48 @@ create_spp_occurence_sf_list <-
            creds,
            path = "species-occurence-tables",
            start_year,
-           end_year) {
-    # Check if path exists and create if needed
-    dir.create(file.path(path), showWarnings = FALSE)
-
-    # Get keys and nms
-    keys <- lapply(spp_list, rgbif::name_backbone, rank='species')
-    nms <- lapply(keys, function(x) x$canonicalName)
-
-    # Create spp occurence GBIF query list
-    q_list <-
-      vspt::create_spp_query_list(
-        spp_list,
-        bb = bb,
-        creds,
-        start_year = start_year,
-        end_year = end_year
-      )
+           end_year,
+           min_ocurences = 50,
+           keep_top_n = F,
+           n_to_keep = 5) {
 
     # Create spp occurence GBIF data list, converted to sf::sf
-    print("Downloading species data")
-    download_list <- rgbif::occ_download_queue(.list = q_list)
-    save(download_list, file=file.path(path, "download_list.rda"))
-    print("Extracting species data")
-    dat_list <- lapply(download_list, rgbif::occ_download_get, path = path, overwrite=TRUE)
-    save(dat_list, file=file.path(path, "dat_list.rda"))
+    try(load(file.path(path, "download_list.rda")), silent=T)
+    try(if(exists("download_list")){print("Found download list")})
+    try(if(!exists("download_list")){
+      print("Downloading species data")
+      # Check if path exists and create if needed
+      dir.create(file.path(path), showWarnings = FALSE)
+
+      # Get keys and nms
+      keys <- lapply(spp_list, rgbif::name_backbone, rank='species')
+      match_type <- sapply(keys, function(x) x$matchType)
+      keys <- keys[match_type != 'NONE']
+      nms <- sapply(keys, function(x) x$canonicalName)
+
+      # Create spp occurence GBIF query list
+      q_list <-
+        vspt::create_spp_query_list(
+          spp_list,
+          bb = bb,
+          creds,
+          start_year = start_year,
+          end_year = end_year
+        )
+      names(q_list) <- nms
+      download_list <- rgbif::occ_download_queue(.list = q_list)
+      save(download_list, file=file.path(path, "download_list.rda"))
+    })
+
+    try(load(file.path(path, "dat_list.rda")), silent=T)
+    try(if(exists("dat_list")){print("Found download data list")})
+    try(if(!exists("dat_list")){
+      print("Extracting species data")
+      dat_list <- lapply(download_list, rgbif::occ_download_get, path = path, overwrite=TRUE)
+      save(dat_list, file=file.path(path, "dat_list.rda"))
+    })
+
+    print("Creating species sfc list")
     sfc_list <- lapply(dat_list, function(x) {
       #x <- dat_list[[1]]
       out <- NA
@@ -68,7 +85,7 @@ create_spp_occurence_sf_list <-
       names(sfc_list) <-
       mapply(function(x, y){
         sel <- tolower(y$rank)
-        print(sel)
+        #print(sel)
         if(nrow(x)>0){return(paste(x[[sel]][1]))}else{return("NA")}
         }, sfc_list, keys)
       )
@@ -76,10 +93,16 @@ create_spp_occurence_sf_list <-
     sfc_list <- sfc_list[names(sfc_list) != "NA"]
 
     # Check number of occurences and filter out species with < 30 occurences
-    no <- sapply(sfc_list, nrow)
+    n_occurences <- sapply(sfc_list, nrow)
+    save(n_occurences, file="n_occurences.rda")
     print("Number of occurences per specicies: ")
-    print(no)
-    sfc_list <- sfc_list[no > 30]
-    print("Number of species with > 30 occurences: ", length(sfc_list))
+    print(n_occurences)
+    sfc_list <- sfc_list[n_occurences > min_ocurences]
+    print(paste("Number of species with > 30 occurences: ", length(sfc_list)))
+    if(keep_top_n){
+      print(paste("Selecting top", n_to_keep, "species"))
+      order(no)[1:n_to_keep]
+      sfc_list <- sfc_list[order(no)[1:n_to_keep]]
+    }
     return(sfc_list)
   }

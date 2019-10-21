@@ -6,7 +6,7 @@
 
 # Plot species distributions
 load(arg_list$spp_zstat_grid_path)
-species <- attr(spp_out, "spp_list")[4]
+species <- attr(spp_out, "spp_list")[1]
 stat <- 'EMca'
 year <-2090
 scenario <-'rcp85'

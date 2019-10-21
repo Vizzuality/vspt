@@ -1,6 +1,7 @@
 ################################################################################
 # PIPELINE ARGUMENTS
 ################################################################################
+sst <- Sys.time()
 
 # Load packages
 require(vspt)
@@ -34,6 +35,26 @@ recalculate = 0
 
 # Set working directory for outputs
 try(setwd(do.call(file.path, as.list(arg_list$out_path))))
+
+
+################################################################################
+# UTILITY FUNCTIONS
+################################################################################
+
+stop_if_not_exists <- function(obj_name){
+  if(!exists(obj_name)){
+    stop(paste("Process halted, failed to find or create", obj_name))}
+}
+
+msg_if_exists <- function(obj_name, mt){
+  if(exists(obj_name)){
+    if(is.na(mt)){
+      print(paste("Successfully created", obj_name))
+    }else{
+      print(paste("Successfully loaded", obj_name, "version:", mt))
+    }
+  }
+}
 
 ################################################################################
 # PREPARE BIOCLIMATIC VARIABLES
@@ -74,8 +95,9 @@ if (!exists('bvso')) {
   )
   save(bvso, file = arg_list$bvso_path)
 }
-stopifnot(exists('bvso'))
-print(paste("Loaded biovar stack object version: ", mt))
+stop_if_not_exists('bvso')
+msg_if_exists('bvso', mt)
+
 # Get land mask
 land_poly <- bvso[[arg_list$region]]$land_poly
 # Select only the stacks we need
@@ -143,8 +165,8 @@ if (exists('spp_occurence_sfc_list')) {
     delete_dsn = TRUE
   )
 }
-stopifnot(exists('spp_occurence_sfc_list'))
-print(paste("Loaded species occurence sfc list object version: ", mt))
+stop_if_not_exists('spp_occurence_sfc_list')
+msg_if_exists('spp_occurence_sfc_list', mt)
 et <- Sys.time()
 print(et - st)
 
@@ -173,8 +195,8 @@ if (!exists('spp_occurence_raster_list')) {
   save(spp_occurence_raster_list,  file = "spp_occurence_raster_list.rda")
   remove(spp_occurence_sfc_list)
 }
-stopifnot(exists('spp_occurence_raster_list'))
-print(paste("Loaded species occurence raster list object version: ", mt))
+stop_if_not_exists('spp_occurence_raster_list')
+msg_if_exists('spp_occurence_raster_list', mt)
 et <- Sys.time()
 print(et - st)
 
@@ -196,8 +218,8 @@ if (!exists('biomod_data_package_list')) {
   save(biomod_data_package_list,  file = "biomod_data_package_list.rda")
   rm(spp_occurence_raster_list)
 }
-stopifnot(exists('biomod_data_package_list'))
-print(paste("Loaded biomod data packager list object version: ", mt))
+stop_if_not_exists('biomod_data_package_list')
+msg_if_exists('biomod_data_package_list', mt)
 et <- Sys.time()
 print(et - st)
 
@@ -224,8 +246,8 @@ if (!exists('biomod_model_list')) {
   save(biomod_model_list,  file = "biomod_model_list.rda")
   rm(biomod_data_package_list, biomod_model_options)
 }
-stopifnot(exists('biomod_model_list'))
-print(paste("Loaded biomod model list object version: ", mt))
+stop_if_not_exists('biomod_model_list')
+msg_if_exists('biomod_model_list', mt)
 et <- Sys.time()
 print(et - st)
 
@@ -246,8 +268,9 @@ if (!exists('biomod_ensemble_model_list')) {
   save(biomod_ensemble_model_list,  file = "biomod_ensemble_model_list.rda")
   rm(biomod_model_list)
 }
-stopifnot(exists('biomod_ensemble_model_list'))
-print(paste("Loaded biomod ensemble model list object version: ", mt))
+
+stop_if_not_exists('biomod_ensemble_model_list')
+msg_if_exists('biomod_ensemble_model_list', mt)
 et <- Sys.time()
 print(et - st)
 
@@ -312,8 +335,8 @@ if (!exists('biomod_model_projection_list')) {
   rm(biomod_model_list)
   gc(reset = T)
 }
-stopifnot(exists('biomod_model_projection_list'))
-print(paste("Loaded biomod model projection list object version: ", mt))
+stop_if_not_exists('biomod_model_projection_list')
+msg_if_exists('biomod_model_projection_list', mt)
 et <- Sys.time()
 print(et - st)
 
@@ -362,11 +385,8 @@ if (!exists('biomod_ensemble_model_projection_list')) {
   rm(biomod_ensemble_model_list, biomod_model_projection_list)
   gc(reset = T)
 }
-stopifnot(exists('biomod_ensemble_model_projection_list'))
-print(paste(
-  "Loaded biomod ensemble_model projection list object version: ",
-  mt
-))
+stop_if_not_exists('biomod_ensemble_model_projection_list')
+msg_if_exists('biomod_ensemble_model_projection_list', mt)
 et <- Sys.time()
 print(et - st)
 
@@ -405,8 +425,8 @@ if (!exists('biomod_ensemble_raster_list')) {
   rm(biomod_ensemble_model_projection_list)
   gc(reset = T)
 }
-stopifnot(exists('biomod_ensemble_raster_list'))
-print(paste("Loaded biomod ensemble raster list object version: ", mt))
+stop_if_not_exists('biomod_ensemble_raster_list')
+msg_if_exists('biomod_ensemble_raster_list', mt)
 et <- Sys.time()
 print(et - st)
 
@@ -438,8 +458,8 @@ if (!exists('vpgo')) {
     sf::st_crop(vpgo, sf::st_bbox(bvso[[arg_list$region]]$historical[[1]]))
   save(vpgo, file = arg_list$vpgo_path)
 }
-stopifnot(exists('vpgo'))
-print(paste("Loaded vector polygon grid object version: ", mt))
+stop_if_not_exists('vpgo')
+msg_if_exists('vpgo', mt)
 et <- Sys.time()
 print(et - st)
 
@@ -458,10 +478,11 @@ if (exists('spp_zstat')) {
   isch <- vspt::chk_output(arg_list,
                            spp_zstat[[arg_list$region]]$historical,
                            type = 'data.frame')
-  iscf <- all(vspt::chk_output_future(arg_list,
+  iscf <- all(!is.null(spp_zstat[[arg_list$region]]$future),
+              vspt::chk_output_future(arg_list,
                                       spp_zstat[[arg_list$region]]$future,
                                       type = 'data.frame'))
-  rm(land_poly)
+  #rm(land_poly)
 }
 # define zonal statistic function (suitable for lapply on a raster::stack)
 if (!exists('spp_zstat') | !isch | !iscf) {
@@ -529,13 +550,13 @@ if (!exists('spp_zstat') | !isch | !iscf) {
     save(spp_zstat, file = "spp_zstat.rda")
   }
 }
-stopifnot(exists('spp_zstat'))
-print(paste("Loaded species zonal stats object version: ", mt))
+stop_if_not_exists('spp_zstat')
+msg_if_exists('spp_zstat', mt)
 et <- Sys.time()
 print(et - st)
 
 # Add to grid
-print("Searching for species zonal stats object")
+print("Searching for species zonal stats grid object")
 st <- Sys.time()
 if (resume & recalculate != 5) {
   try(mt <- file.mtime(arg_list$spp_zstat_grid_path))
@@ -544,8 +565,11 @@ if (resume & recalculate != 5) {
 if (exists('spp_out')) {
   print("Found existing")
   rm(spp_zsat)
+  gc()
 }
 if (!exists('spp_out')) {
+  try(load(arg_list$vpgo))
+  try(load(arg_list$spp_zstat_path))
   print("Adding zstats to grid")
   spp_out <- sf::st_sf(data.frame(vpgo, spp_zstat))
   # remove geometries with NA values
@@ -574,8 +598,8 @@ if (!exists('spp_out')) {
     )
   })
 }
-stopifnot(exists('spp_out'))
-print(paste("Loaded species zonal stats grid object version: ", mt))
+stop_if_not_exists('spp_out')
+msg_if_exists('spp_out', mt)
 et <- Sys.time()
 print(et - st)
 
@@ -602,12 +626,12 @@ if (exists('bv_zstat')) {
                sapply(bv_zstat$future, function(y){
                  sapply(y, is, class2 = 'data.frame')}))
 }
-# define zonal statistic function (suitable for lapply on a raster::stack)
 if (!exists('bv_zstat') | !isch | !iscf) {
+  print("Calculating biovar zonal stats")
   try(load('arg_list.rda'))
-  if(!exists('vpgo')){try(load(arg_list$vpgo_path))}else{stop(!exists('vpgo'))}
-  if(!exists('bvso')){try(load(arg_list$bvso_path))}else{stop(!exists('bvso'))}
-
+  if(!exists('vpgo')){try(load(arg_list$vpgo_path))}
+  if(!exists('bvso')){try(load(arg_list$bvso_path))}
+  # define zonal statistic function (suitable for lapply on a raster::stack)
   do_zs <- function(so)
   {
     soa <- raster::stack(so, raster::area(so))
@@ -665,8 +689,8 @@ if (!exists('bv_zstat') | !isch | !iscf) {
     save(bv_zstat, file = arg_list$bv_zstat_path)
   }
 }
-stopifnot(exists('bv_zstat'))
-print(paste("Loaded biovar zonal stats object version: ", mt))
+stop_if_not_exists('bv_zstat')
+msg_if_exists('bv_zstat', mt)
 et <- Sys.time()
 print(et - st)
 
@@ -680,6 +704,7 @@ if (resume & recalculate != 5) {
 if (exists('bv_out')) {
   print("Found existing")
   rm(bv_zsat)
+  gc()
 }
 if (!exists('bv_out')) {
   print("Adding zstats to grid")
@@ -710,8 +735,8 @@ if (!exists('bv_out')) {
     )
   })
 }
-stopifnot(exists('bv_out'))
-print(paste("Loaded biovar zonal stats grid object version: ", mt))
+stop_if_not_exists('bv_out')
+msg_if_exists('bv_out', mt)
 et <- Sys.time()
 print(et - st)
 
@@ -733,6 +758,7 @@ if (exists('spp_sstat')) {
 }
 # define zonal statistic function (suitable for lapply on a raster::stack)
 if (!exists('spp_sstat')) {
+  print("Calculating for species summary stats object")
   # FIXME why can i not access units::units?
   require(units)
   # Get GADM v 3.6 adm0 polygon
@@ -792,7 +818,9 @@ if (!exists('spp_sstat')) {
     list('1995' = list('current'= spp_sstat$historical)),
     spp_sstat$future)),1)
   nms <- matrix(unlist(strsplit(names(tmp), "[.]")), ncol=3, byrow = T)
-  gbif_id <- unlist(sapply(arg_list$spp_list, rgbif::name_backbone, rank='species')['usageKey',])
+  gbif_id <- sapply(arg_list$spp_list, function(spp){
+    rgbif::name_backbone(spp, rank='species')[['usageKey']]
+  })
   gbif_id_df <- data.frame(species=names(gbif_id), gbifId=gbif_id)
   df <- data.frame(
     iso=rep(arg_list$iso3, length(nms)),
@@ -804,8 +832,8 @@ if (!exists('spp_sstat')) {
   )
   write.csv(df, arg_list$spp_sstat_out_path, na = 'NA', row.names = F)
 }
-stopifnot(exists('spp_sstat'))
-print(paste("Loaded species summary stats object version: ", mt))
+stop_if_not_exists('spp_sstat')
+msg_if_exists('spp_sstat', mt)
 et <- Sys.time()
 print(et - st)
 
@@ -825,7 +853,7 @@ if (exists('bv_sstat')) {
 }
 # define zonal statistic function (suitable for lapply on a raster::stack)
 if (!exists('bv_sstat')) {
-
+  print("Calculating for biovar summary stats object")
   # Get GADM v 3.6 adm0 polygon
   g <- sf::st_as_sf(raster::getData(
     country = arg_list$iso3,
@@ -893,13 +921,18 @@ if (!exists('bv_sstat')) {
     timeInterval=nms[,1],
     scenario=nms[,2],
     biovar=nms[,3],
-    propTotalArea=tmp
+    weightedMean=tmp
   )
   write.csv(df, arg_list$bv_sstat_out_path, na = 'NA', row.names = F)
 }
-stopifnot(exists('bv_sstat'))
-print(paste("Loaded biovar summary stats object version: ", mt))
+stop_if_not_exists('bv_sstat')
+msg_if_exists('bv_sstat', mt)
 et <- Sys.time()
 print(et - st)
 
+eet <- Sys.time()
 print("Job completed!!")
+total_time <- eet-sst
+save(total_time, file="total_time.rda")
+print("Total time:")
+total_time

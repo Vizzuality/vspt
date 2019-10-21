@@ -5,7 +5,8 @@
 \title{Creat species occurence sf::sfc list}
 \usage{
 create_spp_occurence_sf_list(spp_list, bb, creds,
-  path = "species-occurence-tables", start_year, end_year)
+  path = "species-occurence-tables", start_year, end_year,
+  min_ocurences = 50, keep_top_n = F, n_to_keep = 5)
 }
 \arguments{
 \item{spp_list}{List of scientific species or genus names}
