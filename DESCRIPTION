@@ -23,4 +23,5 @@ Imports:
     uuid,
     exactextractr,
     rgbif,
-    biomod2
+    biomod2,
+    snow
