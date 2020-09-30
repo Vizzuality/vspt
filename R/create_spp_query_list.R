@@ -12,8 +12,8 @@
 #'
 #' @examples
 #spp_list <- c('Pinus mugo')
-#geom <- sf::st_as_text(sf::st_as_sfc(sf::st_bbox(bvso$biovar_Sweden$historical$raw)))
-#create_spp_query_list(spp_list, geom, creds, start_year=1986, end_year=2020)
+#bb <- sf::st_as_text(sf::st_as_sfc(sf::st_bbox(bvso$biovar_Sweden$historical$raw)))
+#create_spp_query_list(spp_list, bb, creds, start_year=1986, end_year=2020)
 create_spp_query_list <- function(spp_list, bb, creds, start_year=1986, end_year=2020){
   keys <- lapply(spp_list, rgbif::name_backbone, rank='species')
   match_type <- sapply(keys, function(x) x$matchType)
@@ -48,17 +48,17 @@ create_spp_query_list <- function(spp_list, bb, creds, start_year=1986, end_year
    q_list <- lapply(keys, function(k){
      print(k$canonicalName)
      rgbif::occ_download_prep(
-    paste("taxonKey =", k$usageKey),
-    "basisOfRecord = HUMAN_OBSERVATION,OBSERVATION,MACHINE_OBSERVATION,PRESERVED_SPECIMEN,MATERIAL_SAMPLE",
-    "hasCoordinate = true",
-    paste("decimalLatitude >=", decimalLatitude[1]),
-    paste("decimalLatitude <=", decimalLatitude[2]),
-    paste("decimalLongitude >=", decimalLongitude[1]),
-    paste("decimalLongitude <=", decimalLongitude[2]),
+    rgbif::pred("taxonKey", k$usageKey),
+    rgbif::pred_in("basisOfRecord", c("HUMAN_OBSERVATION","OBSERVATION","MACHINE_OBSERVATION","PRESERVED_SPECIMEN","MATERIAL_SAMPLE")),
+    rgbif::pred("hasCoordinate",TRUE),
+    rgbif::pred_gte("decimalLatitude", decimalLatitude[1]),
+    rgbif::pred_lte("decimalLatitude", decimalLatitude[2]),
+    rgbif::pred_gte("decimalLongitude", decimalLongitude[1]),
+    rgbif::pred_lte("decimalLongitude", decimalLongitude[2]),
     #paste("geometry =", geom),
-    "hasGeospatialIssue = false",
-    paste("year >=", start_year),
-    paste("year <=", end_year),
+    rgbif::pred("hasGeospatialIssue",FALSE),
+    rgbif::pred_gte("year", start_year),
+    rgbif::pred_lte("year", end_year),
     email =creds$email,
     pwd =creds$pwd,
     user =creds$user,
