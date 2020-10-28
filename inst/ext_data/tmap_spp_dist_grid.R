@@ -1,6 +1,6 @@
 # Plot species distributions using tmap
-load("SWE_zonal_species_ISEA-3-HEXAGON_grid.rda")
-species <- attr(spp_out, "spp_list")[13]
+load("ISEA-3-HEXAGON_grid.rda")
+species <- attr(spp_out, "spp_list")[1]
 stat <- 'EMca'
 year <-2090
 scenario <-'rcp85'
@@ -16,8 +16,8 @@ pfp <- function(iso, tp, spp, stat, y=NULL, s=NULL){
   return(out)
 }
 
-h <- pfp('biovar_Sweden', 'historical', species, stat)
-f <- pfp('biovar_Sweden', 'future', species, stat, year, scenario)
+h <- pfp('biovar_Spain', 'historical', species, stat)
+f <- pfp('biovar_Spain', 'future', species, stat, year, scenario)
 spp <- spp_out[,c("uuid", h, f)]
 names(spp) <- c('uuid', 'historical', 'future', 'geometry')
 spp$historical <- spp$historical/1000

@@ -13,7 +13,7 @@ arg_list = yaml::read_yaml("arg_list.yaml")
 arg_list$creds <- yaml::read_yaml(arg_list$creds_path)
 
 # Parse species list
-arg_list$search_spp_list <- select_species_names(
+arg_list$search_spp_list <- vspt::select_species_names(
   do.call(file.path, as.list(arg_list$search_spp_list_path)),
   arg_list$iso3,
   field="canonicalName")
@@ -160,7 +160,7 @@ if (exists('spp_occurence_sfc_list')) {
       "GEOMETRY=AS_WKT",
       "GEOMETRY_NAME=geometry",
       "SEPARATOR=COMMA",
-      "OGR_WKT_PRECISION=7"
+      "OGR_WKT_PRECISION=6"
     ),
     delete_dsn = TRUE
   )
@@ -814,22 +814,25 @@ if (!exists('spp_sstat')) {
 
   # Write
   load('arg_list.rda')
-  tmp <- round(unlist(c(
+  tmp <- na.omit(round(unlist(c(
     list('1995' = list('current'= spp_sstat$historical)),
-    spp_sstat$future)),1)
+    spp_sstat$future)),4))
   nms <- matrix(unlist(strsplit(names(tmp), "[.]")), ncol=3, byrow = T)
   gbif_id <- sapply(arg_list$spp_list, function(spp){
     rgbif::name_backbone(spp, rank='species')[['usageKey']]
   })
   gbif_id_df <- data.frame(species=names(gbif_id), gbifId=gbif_id)
   df <- data.frame(
-    iso=rep(arg_list$iso3, length(nms)),
+    iso=rep(arg_list$iso3, length(tmp)),
     timeInterval=nms[,1],
     scenario=nms[,2],
     species=nms[,3],
     gbifId = gbif_id_df$gbifId[match(nms[,3], gbif_id_df$species)],
     propTotalArea=tmp
+    , stringsAsFactors = F
   )
+  # fix repeated values
+  df <- unique(df)
   write.csv(df, arg_list$spp_sstat_out_path, na = 'NA', row.names = F)
 }
 stop_if_not_exists('spp_sstat')
@@ -914,7 +917,7 @@ if (!exists('bv_sstat')) {
   # Write
   tmp <- round(unlist(c(
     list('1995' = list('current'= bv_sstat$historical)),
-    bv_sstat$future)),1)
+    bv_sstat$future)),3)
   nms <- matrix(unlist(strsplit(names(tmp), "[.]")), ncol=3, byrow = T)
   df <- data.frame(
     iso=rep(arg_list$iso3, length(nms)),
@@ -923,6 +926,8 @@ if (!exists('bv_sstat')) {
     biovar=nms[,3],
     weightedMean=tmp
   )
+  # fix repeated values
+  df <- unique(df)
   write.csv(df, arg_list$bv_sstat_out_path, na = 'NA', row.names = F)
 }
 stop_if_not_exists('bv_sstat')
